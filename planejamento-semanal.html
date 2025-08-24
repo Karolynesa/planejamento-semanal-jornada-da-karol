@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Meu Planejamento Semanal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            background: white;
+        }
+        
+        .app-header {
+            background: #4a5568;
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .app-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            background: #718096;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: #5a6578;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: #48bb78;
+        }
+        
+        .btn-primary:hover {
+            background: #38a169;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: white;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 0 20px;
+            overflow-x: auto;
+            display: flex;
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+        }
+        
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #718096;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-size: 1em;
+        }
+        
+        .tab-btn:hover {
+            background: #f7fafc;
+            color: #2d3748;
+        }
+        
+        .tab-btn.active {
+            color: #2d3748;
+            border-bottom-color: #4299e1;
+            background: #edf2f7;
+        }
+        
+        /* Day Content */
+        .day-content {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s;
+        }
+        
+        .day-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .day-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+            border-radius: 15px;
+        }
+        
+        .day-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .day-summary {
+            color: #718096;
+            font-size: 1em;
+        }
+        
+        /* Schedule Table */
+        .schedule-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .schedule-table th {
+            background: #2d3748;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .schedule-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        
+        .schedule-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .schedule-table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .time-cell {
+            font-weight: 600;
+            color: #4a5568;
+            width: 120px;
+        }
+        
+        .activity-cell {
+            position: relative;
+        }
+        
+        .activity-block {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            user-select: none;
+            color: white;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .activity-block:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Cores sólidas para cada tipo de atividade */
+        .passeio { background: #9f7aea; }
+        .cafe { background: #ed8936; }
+        .trabalho-cras { background: #4299e1; }
+        .atendimento { background: #48bb78; }
+        .musculacao { background: #f56565; }
+        .muay-thai { background: #38b2ac; }
+        .danca { background: #ed64a6; }
+        .funcional { background: #ecc94b; color: #2d3748; }
+        .descanso { background: #cbd5e0; color: #2d3748; }
+        .lazer { background: #b794f4; }
+        .sono { background: #718096; }
+        .transporte { background: #a0aec0; }
+        
+        /* Add Activity Button */
+        .add-activity-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #718096;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .add-activity-btn:hover {
+            background: #edf2f7;
+            border-color: #4299e1;
+            color: #4299e1;
+        }
+        
+        /* Stats Section */
+        .day-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-save {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #38a169;
+        }
+        
+        .btn-delete {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #e53e3e;
+        }
+        
+        .btn-delete {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #e53e3e;
+        }
+        
+        .btn-cancel {
+            background: #a0aec0;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background: #718096;
+        }
+        
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 1.1em;
+            }
+            
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+            
+            .tab-btn {
+                padding: 12px 15px;
+                font-size: 0.9em;
+            }
+            
+            .day-title {
+                font-size: 1.5em;
+            }
+            
+            .schedule-table {
+                font-size: 0.9em;
+            }
+            
+            .time-cell {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">📅 Meu Planejamento Semanal</h1>
+                <div class="header-buttons">
+                    <button class="btn" onclick="exportSchedule()">📥 Exportar</button>
+                    <button class="btn btn-primary" onclick="saveToLocal()">💾 Salvar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="showDay('segunda')">Segunda</button>
+            <button class="tab-btn" onclick="showDay('terca')">Terça</button>
+            <button class="tab-btn" onclick="showDay('quarta')">Quarta</button>
+            <button class="tab-btn" onclick="showDay('quinta')">Quinta</button>
+            <button class="tab-btn" onclick="showDay('sexta')">Sexta</button>
+            <button class="tab-btn" onclick="showDay('sabado')">Sábado</button>
+            <button class="tab-btn" onclick="showDay('domingo')">Domingo</button>
+        </div>
+        
+        <!-- Segunda-feira -->
+        <div class="day-content active" id="day-segunda">
+            <div class="day-header">
+                <h2 class="day-title">Segunda-feira</h2>
+                <p class="day-summary">Dia intenso com Muay Thai, Dança e Musculação</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Atividades Físicas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">6h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Atendimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-segunda">
+                    <tr>
+                        <td class="time-cell">06:30 - 07:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio" onclick="editActivity('segunda', 0)">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:00 - 07:10</td>
+                        <td class="activity-cell">
+                            <div class="activity-block cafe" onclick="editActivity('segunda', 1)">Café da Manhã ☕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:10 - 08:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block muay-thai" onclick="editActivity('segunda', 2)">Muay Thai 🥊</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">08:15 - 09:15</td>
+                        <td class="activity-cell">
+                            <div class="activity-block danca" onclick="editActivity('segunda', 3)">Dança 💃</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:30 - 10:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte" onclick="editActivity('segunda', 4)">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">10:00 - 16:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block trabalho-cras" onclick="editActivity('segunda', 5)">CRAS 💼</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">16:00 - 16:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte" onclick="editActivity('segunda', 6)">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">17:00 - 18:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block musculacao" onclick="editActivity('segunda', 7)">Musculação 💪</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:00 - 21:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer" onclick="editActivity('segunda', 8)">Jantar + Lazer 💑</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">21:30 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso" onclick="editActivity('segunda', 9)">Relaxamento 🧘‍♀️</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono" onclick="editActivity('segunda', 10)">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Terça-feira -->
+        <div class="day-content" id="day-terca">
+            <div class="day-header">
+                <h2 class="day-title">Terça-feira</h2>
+                <p class="day-summary">Dia com múltiplos atendimentos clínicos</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">Atividade Física</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">6h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Atendimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-terca">
+                    <tr>
+                        <td class="time-cell">06:30 - 07:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio" onclick="editActivity('terca', 0)">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:00 - 07:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block cafe" onclick="editActivity('terca', 1)">Café da Manhã ☕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">08:30 - 09:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('terca', 2)">Isa (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:30 - 10:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte" onclick="editActivity('terca', 3)">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">10:00 - 16:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block trabalho-cras" onclick="editActivity('terca', 4)">CRAS 💼</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">16:00 - 16:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte" onclick="editActivity('terca', 5)">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">17:00 - 18:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('terca', 6)">Andrea (quinzenal) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:00 - 19:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('terca', 7)">Welora (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">19:30 - 20:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('terca', 8)">Jordanna (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">20:30 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso" onclick="editActivity('terca', 9)">Relaxamento 🧘‍♀️</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono" onclick="editActivity('terca', 10)">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Quarta-feira -->
+        <div class="day-content" id="day-quarta">
+            <div class="day-header">
+                <h2 class="day-title">Quarta-feira</h2>
+                <p class="day-summary">Trabalho e atendimentos no final do dia</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">Atividade Física</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">6h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Atendimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-quarta">
+                    <tr>
+                        <td class="time-cell">06:30 - 07:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio" onclick="editActivity('quarta', 0)">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:00 - 07:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block cafe" onclick="editActivity('quarta', 1)">Café da Manhã ☕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:30 - 09:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso" onclick="editActivity('quarta', 2)">Preparo/Descanso 🏠</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:30 - 10:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte" onclick="editActivity('quarta', 3)">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">10:00 - 16:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block trabalho-cras" onclick="editActivity('quarta', 4)">CRAS 💼</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">16:00 - 16:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte" onclick="editActivity('quarta', 5)">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">17:30 - 18:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('quarta', 6)">Midori (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:30 - 19:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('quarta', 7)">Gabi (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">19:30 - 20:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento" onclick="editActivity('quarta', 8)">Fabricia (quinzenal) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">20:30 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso" onclick="editActivity('quarta', 9)">Relaxamento 🧘‍♀️</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono" onclick="editActivity('quarta', 10)">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Quinta-feira -->
+        <div class="day-content" id="day-quinta">
+            <div class="day-header">
+                <h2 class="day-title">Quinta-feira</h2>
+                <p class="day-summary">Dia com funcional e atendimentos</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Atividades Físicas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">6h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Atendimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-quinta">
+                    <tr>
+                        <td class="time-cell">06:30 - 07:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:00 - 07:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block cafe">Café da Manhã ☕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">08:30 - 09:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento">Amanda (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:30 - 10:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">10:00 - 16:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block trabalho-cras">CRAS 💼</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">16:30 - 17:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block funcional">Funcional 🏃‍♀️</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">17:30 - 18:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:00 - 19:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento">Josi (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">19:00 - 21:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">Jantar + Lazer 💑</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">21:30 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso">Relaxamento 🧘‍♀️</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Sexta-feira -->
+        <div class="day-content" id="day-sexta">
+            <div class="day-header">
+                <h2 class="day-title">Sexta-feira</h2>
+                <p class="day-summary">Dia mais leve com musculação</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Atividades Físicas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">6h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Atendimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-sexta">
+                    <tr>
+                        <td class="time-cell">06:30 - 07:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:00 - 07:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block cafe">Café da Manhã ☕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">07:30 - 09:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso">Preparo/Descanso 🏠</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:30 - 10:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">10:00 - 16:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block trabalho-cras">CRAS 💼</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">16:00 - 16:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block transporte">Transporte 🚗</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">17:00 - 18:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block musculacao">Musculação 💪</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:00 - 21:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">Jantar + Lazer 💑</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">21:30 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso">Relaxamento 🧘‍♀️</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Sábado -->
+        <div class="day-content" id="day-sabado">
+            <div class="day-header">
+                <h2 class="day-title">Sábado</h2>
+                <p class="day-summary">Final de semana com mais tempo livre</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Atividades Físicas</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">0h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">Atendimento</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-sabado">
+                    <tr>
+                        <td class="time-cell">08:00 - 08:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:00 - 10:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block musculacao">Musculação 💪</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">10:00 - 13:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">Hobbies 🧶📚</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">13:00 - 14:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block atendimento">Tatiana (Atendimento) 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">14:00 - 18:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">My Story 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:00 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">Lazer com Companheiro 🎬</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Domingo -->
+        <div class="day-content" id="day-domingo">
+            <div class="day-header">
+                <h2 class="day-title">Domingo</h2>
+                <p class="day-summary">Dia de descanso e preparação para a semana</p>
+            </div>
+            
+            <div class="day-stats">
+                <div class="stat-box">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">Atividade Física</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">0h</div>
+                    <div class="stat-label">Trabalho CRAS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Atendimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">22h</div>
+                    <div class="stat-label">Hora de Dormir</div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Atividade</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-domingo">
+                    <tr>
+                        <td class="time-cell">08:00 - 08:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block passeio">Passeio 🐕</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">09:00 - 12:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso">Descanso/Hobbies 🏠</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">12:00 - 18:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">My Story 💻</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">18:00 - 21:30</td>
+                        <td class="activity-cell">
+                            <div class="activity-block lazer">Lazer com Companheiro 🎬</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">21:30 - 22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block descanso">Preparo da Semana 📝</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell">22:00</td>
+                        <td class="activity-cell">
+                            <div class="activity-block sono">Dormir 😴</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Modal for editing activities -->
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <div class="modal-header">Editar Atividade</div>
+                <div class="form-group">
+                    <label class="form-label">Atividade</label>
+                    <input type="text" class="form-input" id="activityName" placeholder="Nome da atividade">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" id="activityType">
+                        <option value="passeio">Passeio</option>
+                        <option value="cafe">Café</option>
+                        <option value="trabalho-cras">CRAS</option>
+                        <option value="atendimento">Atendimento</option>
+                        <option value="musculacao">Musculação</option>
+                        <option value="muay-thai">Muay Thai</option>
+                        <option value="danca">Dança</option>
+                        <option value="funcional">Funcional</option>
+                        <option value="descanso">Descanso</option>
+                        <option value="lazer">Lazer</option>
+                        <option value="sono">Sono</option>
+                        <option value="transporte">Transporte</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Horário</label>
+                    <input type="text" class="form-input" id="activityTime" placeholder="Ex: 10:00 - 11:00">
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-save" onclick="saveActivity()">Salvar</button>
+                    <button class="btn-delete" onclick="deleteActivity()">Deletar</button>
+                    <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentDay = 'segunda';
+        let currentEditingActivity = null;
+        
+        function showDay(day) {
+            currentDay = day;
+            
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show corresponding day content
+            document.querySelectorAll('.day-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`day-${day}`).classList.add('active');
+        }
+        
+        function editActivity(day, index) {
+            currentEditingActivity = { day, index };
+            
+            // Get activity data from the table
+            const row = document.getElementById(`schedule-${day}`).children[index];
+            const activityBlock = row.querySelector('.activity-block');
+            const type = activityBlock.className.split(' ')[1];
+            
+            // Auto-fill name based on type
+            const typeNames = {
+                'passeio': 'Passeio 🐕',
+                'cafe': 'Café da Manhã ☕',
+                'trabalho-cras': 'CRAS 💼',
+                'atendimento': activityBlock.textContent, // Keep original for appointments
+                'musculacao': 'Musculação 💪',
+                'muay-thai': 'Muay Thai 🥊',
+                'danca': 'Dança 💃',
+                'funcional': 'Funcional 🏃‍♀️',
+                'descanso': 'Descanso 🧘‍♀️',
+                'lazer': 'Lazer 💑',
+                'sono': 'Dormir 😴',
+                'transporte': 'Transporte 🚗'
+            };
+            
+            document.getElementById('activityName').value = typeNames[type] || activityBlock.textContent;
+            document.getElementById('activityType').value = type;
+            document.getElementById('activityTime').value = row.querySelector('.time-cell').textContent;
+            
+            // Auto-update name when type changes
+            document.getElementById('activityType').onchange = function() {
+                const newType = this.value;
+                if (typeNames[newType] && newType !== 'atendimento') {
+                    document.getElementById('activityName').value = typeNames[newType];
+                }
+            };
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+        
+        function deleteActivity() {
+            if (!currentEditingActivity) return;
+            
+            if (confirm('Deseja realmente deletar esta atividade?')) {
+                const { day, index } = currentEditingActivity;
+                const tbody = document.getElementById(`schedule-${day}`);
+                tbody.children[index].remove();
+                
+                closeModal();
+                saveToLocal();
+                updateDayStats(day);
+            }
+        }
+        
+        function updateDayStats(day) {
+            // Update statistics after deletion
+            const rows = document.getElementById(`schedule-${day}`).children;
+            let physicalCount = 0;
+            let attendanceCount = 0;
+            
+            for (let row of rows) {
+                const activityBlock = row.querySelector('.activity-block');
+                const type = activityBlock.className.split(' ')[1];
+                
+                if (['musculacao', 'muay-thai', 'danca', 'funcional', 'passeio'].includes(type)) {
+                    physicalCount++;
+                } else if (type === 'atendimento') {
+                    attendanceCount++;
+                }
+            }
+            
+            // Update stat display if exists
+            const statsGrid = document.querySelector(`#day-${day} .day-stats`);
+            if (statsGrid) {
+                const statBoxes = statsGrid.querySelectorAll('.stat-box');
+                statBoxes[0].querySelector('.stat-value').textContent = physicalCount;
+                statBoxes[2].querySelector('.stat-value').textContent = attendanceCount;
+            }
+        }
+        
+        function saveActivity() {
+            if (!currentEditingActivity) return;
+            
+            const name = document.getElementById('activityName').value;
+            const type = document.getElementById('activityType').value;
+            const time = document.getElementById('activityTime').value;
+            
+            if (!name) {
+                alert('Por favor, insira o nome da atividade!');
+                return;
+            }
+            
+            // Update the activity in the table
+            const { day, index } = currentEditingActivity;
+            const row = document.getElementById(`schedule-${day}`).children[index];
+            const activityBlock = row.querySelector('.activity-block');
+            
+            activityBlock.textContent = name;
+            activityBlock.className = `activity-block ${type}`;
+            row.querySelector('.time-cell').textContent = time;
+            
+            closeModal();
+            saveToLocal();
+        }
+        
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentEditingActivity = null;
+        }
+        
+        function saveToLocal() {
+            // Save to localStorage
+            const scheduleData = {};
+            const days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
+            
+            days.forEach(day => {
+                const rows = document.getElementById(`schedule-${day}`).children;
+                scheduleData[day] = [];
+                
+                for (let row of rows) {
+                    const time = row.querySelector('.time-cell').textContent;
+                    const activityBlock = row.querySelector('.activity-block');
+                    scheduleData[day].push({
+                        time: time,
+                        name: activityBlock.textContent,
+                        type: activityBlock.className.split(' ')[1]
+                    });
+                }
+            });
+            
+            localStorage.setItem('weeklyScheduleTabbed', JSON.stringify(scheduleData));
+            alert('Planejamento salvo com sucesso! ✅');
+        }
+        
+        function loadFromLocal() {
+            const saved = localStorage.getItem('weeklyScheduleTabbed');
+            if (saved) {
+                const scheduleData = JSON.parse(saved);
+                // Load data back into tables
+                // Implementation would go here
+            }
+        }
+        
+        function exportSchedule() {
+            const scheduleData = {};
+            const days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
+            
+            days.forEach(day => {
+                const rows = document.getElementById(`schedule-${day}`).children;
+                scheduleData[day] = [];
+                
+                for (let row of rows) {
+                    const time = row.querySelector('.time-cell').textContent;
+                    const activityBlock = row.querySelector('.activity-block');
+                    scheduleData[day].push({
+                        time: time,
+                        name: activityBlock.textContent,
+                        type: activityBlock.className.split(' ')[1]
+                    });
+                }
+            });
+            
+            const dataStr = JSON.stringify(scheduleData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', 'planejamento-semanal.json');
+            linkElement.click();
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromLocal();
+            
+            // Add click handlers to all activity blocks
+            const days = ['quinta', 'sexta', 'sabado', 'domingo'];
+            days.forEach(day => {
+                const tbody = document.getElementById(`schedule-${day}`);
+                if (tbody) {
+                    const rows = tbody.querySelectorAll('tr');
+                    rows.forEach((row, index) => {
+                        const activityBlock = row.querySelector('.activity-block');
+                        if (activityBlock) {
+                            activityBlock.style.cursor = 'pointer';
+                            activityBlock.onclick = () => editActivity(day, index);
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

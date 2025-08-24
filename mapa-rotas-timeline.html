@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Rotas - Timeline Diário</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            background: #2d3748;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .day-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: #f7fafc;
+            flex-wrap: wrap;
+        }
+        
+        .day-btn {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #4a5568;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+        
+        .day-btn:hover {
+            background: #edf2f7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .day-btn.active {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .timeline-container {
+            background: #fafafa;
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            min-height: 600px;
+        }
+        
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .timeline-title {
+            font-size: 1.3em;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .timeline-date {
+            color: #718096;
+            font-size: 0.95em;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #4299e1 0%, #9f7aea 100%);
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #4299e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #4299e1;
+            z-index: 2;
+        }
+        
+        .timeline-content {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .timeline-content:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .timeline-time {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .timeline-activity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+        }
+        
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.05em;
+        }
+        
+        .activity-location {
+            font-size: 0.85em;
+            color: #718096;
+        }
+        
+        .timeline-travel {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f7fafc;
+            border-left: 3px solid #a0aec0;
+            border-radius: 5px;
+            margin-left: 0;
+            font-size: 0.9em;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .travel-icon {
+            font-size: 1.2em;
+        }
+        
+        /* Stats Panel */
+        .stats-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+        }
+        
+        .stats-title {
+            font-size: 1.2em;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .stat-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+        
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4299e1, #9f7aea);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Activity type colors */
+        .type-passeio { background: #9f7aea; }
+        .type-cafe { background: #ed8936; }
+        .type-trabalho { background: #4299e1; }
+        .type-atendimento { background: #48bb78; }
+        .type-musculacao { background: #f56565; }
+        .type-muaythai { background: #38b2ac; }
+        .type-danca { background: #ed64a6; }
+        .type-funcional { background: #ecc94b; }
+        .type-descanso { background: #cbd5e0; }
+        .type-lazer { background: #b794f4; }
+        .type-transporte { background: #a0aec0; }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            opacity: 0.95;
+        }
+        
+        .summary-card .total-time {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .day-selector {
+                padding: 10px;
+            }
+            
+            .day-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+            
+            .timeline {
+                padding-left: 30px;
+            }
+            
+            .timeline-marker {
+                left: -25px;
+                width: 25px;
+                height: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗓️ Mapa de Rotas Diário</h1>
+            <p>Visualize sua rotina com timeline e estatísticas</p>
+        </div>
+        
+        <div class="day-selector">
+            <button class="day-btn active" onclick="showDay('segunda')">Segunda</button>
+            <button class="day-btn" onclick="showDay('terca')">Terça</button>
+            <button class="day-btn" onclick="showDay('quarta')">Quarta</button>
+            <button class="day-btn" onclick="showDay('quinta')">Quinta</button>
+            <button class="day-btn" onclick="showDay('sexta')">Sexta</button>
+            <button class="day-btn" onclick="showDay('sabado')">Sábado</button>
+            <button class="day-btn" onclick="showDay('domingo')">Domingo</button>
+        </div>
+        
+        <div class="content">
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <h2 class="timeline-title" id="dayTitle">Segunda-feira</h2>
+                    <span class="timeline-date" id="dayDate">Rotina do dia</span>
+                </div>
+                <div class="timeline" id="timeline">
+                    <!-- Timeline items will be generated here -->
+                </div>
+            </div>
+            
+            <div class="stats-panel">
+                <h2 class="stats-title">📊 Estatísticas do Dia</h2>
+                <div id="statsContent">
+                    <!-- Stats will be generated here -->
+                </div>
+                <div class="summary-card">
+                    <h3>Tempo Total de Atividades</h3>
+                    <div class="total-time" id="totalTime">14h30</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const scheduleData = {
+            segunda: {
+                title: 'Segunda-feira',
+                activities: [
+                    { time: '06:30 - 07:00', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '07:00 - 07:10', name: 'Café da Manhã', type: 'cafe', icon: '☕', location: 'Casa', duration: 10 },
+                    { travel: true, time: '5 min', mode: '🚶‍♀️ Caminhada' },
+                    { time: '07:10 - 08:00', name: 'Muay Thai', type: 'muaythai', icon: '🥊', location: 'Academia', duration: 50 },
+                    { travel: true, time: '10 min', mode: '🚶‍♀️ Caminhada' },
+                    { time: '08:15 - 09:15', name: 'Dança', type: 'danca', icon: '💃', location: 'Estúdio', duration: 60 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '10:00 - 16:00', name: 'Trabalho CRAS', type: 'trabalho', icon: '💼', location: 'CRAS', duration: 360 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '17:00 - 18:00', name: 'Musculação', type: 'musculacao', icon: '💪', location: 'Academia', duration: 60 },
+                    { travel: true, time: '5 min', mode: '🚶‍♀️ Caminhada' },
+                    { time: '18:00 - 21:30', name: 'Jantar e Lazer', type: 'lazer', icon: '💑', location: 'Casa', duration: 210 },
+                    { time: '21:30 - 22:00', name: 'Relaxamento', type: 'descanso', icon: '🧘‍♀️', location: 'Casa', duration: 30 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            },
+            terca: {
+                title: 'Terça-feira',
+                activities: [
+                    { time: '06:30 - 07:00', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '07:00 - 07:30', name: 'Café da Manhã', type: 'cafe', icon: '☕', location: 'Casa', duration: 30 },
+                    { time: '08:30 - 09:30', name: 'Atendimento - Isa', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '10:00 - 16:00', name: 'Trabalho CRAS', type: 'trabalho', icon: '💼', location: 'CRAS', duration: 360 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '17:00 - 18:00', name: 'Atendimento - Andrea', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '18:00 - 19:00', name: 'Atendimento - Welora', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '19:30 - 20:30', name: 'Atendimento - Jordanna', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '20:30 - 22:00', name: 'Relaxamento', type: 'descanso', icon: '🧘‍♀️', location: 'Casa', duration: 90 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            },
+            quarta: {
+                title: 'Quarta-feira',
+                activities: [
+                    { time: '06:30 - 07:00', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '07:00 - 07:30', name: 'Café da Manhã', type: 'cafe', icon: '☕', location: 'Casa', duration: 30 },
+                    { time: '07:30 - 09:30', name: 'Preparo/Descanso', type: 'descanso', icon: '🏠', location: 'Casa', duration: 120 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '10:00 - 16:00', name: 'Trabalho CRAS', type: 'trabalho', icon: '💼', location: 'CRAS', duration: 360 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '17:30 - 18:30', name: 'Atendimento - Midori', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '18:30 - 19:30', name: 'Atendimento - Gabi', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '19:30 - 20:30', name: 'Atendimento - Fabricia', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '20:30 - 22:00', name: 'Relaxamento', type: 'descanso', icon: '🧘‍♀️', location: 'Casa', duration: 90 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            },
+            quinta: {
+                title: 'Quinta-feira',
+                activities: [
+                    { time: '06:30 - 07:00', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '07:00 - 07:30', name: 'Café da Manhã', type: 'cafe', icon: '☕', location: 'Casa', duration: 30 },
+                    { time: '08:30 - 09:30', name: 'Atendimento - Amanda', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '10:00 - 16:00', name: 'Trabalho CRAS', type: 'trabalho', icon: '💼', location: 'CRAS', duration: 360 },
+                    { travel: true, time: '5 min', mode: '🚶‍♀️ Caminhada' },
+                    { time: '16:30 - 17:30', name: 'Funcional', type: 'funcional', icon: '🏃‍♀️', location: 'Academia', duration: 60 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '18:00 - 19:00', name: 'Atendimento - Josi', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '19:00 - 21:30', name: 'Jantar e Lazer', type: 'lazer', icon: '💑', location: 'Casa', duration: 150 },
+                    { time: '21:30 - 22:00', name: 'Relaxamento', type: 'descanso', icon: '🧘‍♀️', location: 'Casa', duration: 30 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            },
+            sexta: {
+                title: 'Sexta-feira',
+                activities: [
+                    { time: '06:30 - 07:00', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '07:00 - 07:30', name: 'Café da Manhã', type: 'cafe', icon: '☕', location: 'Casa', duration: 30 },
+                    { time: '07:30 - 09:30', name: 'Preparo/Descanso', type: 'descanso', icon: '🏠', location: 'Casa', duration: 120 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '10:00 - 16:00', name: 'Trabalho CRAS', type: 'trabalho', icon: '💼', location: 'CRAS', duration: 360 },
+                    { travel: true, time: '30 min', mode: '🚗 Carro' },
+                    { time: '17:00 - 18:00', name: 'Musculação', type: 'musculacao', icon: '💪', location: 'Academia', duration: 60 },
+                    { travel: true, time: '5 min', mode: '🚶‍♀️ Caminhada' },
+                    { time: '18:00 - 21:30', name: 'Jantar e Lazer', type: 'lazer', icon: '💑', location: 'Casa', duration: 210 },
+                    { time: '21:30 - 22:00', name: 'Relaxamento', type: 'descanso', icon: '🧘‍♀️', location: 'Casa', duration: 30 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            },
+            sabado: {
+                title: 'Sábado',
+                activities: [
+                    { time: '08:00 - 08:30', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '09:00 - 10:00', name: 'Musculação', type: 'musculacao', icon: '💪', location: 'Academia', duration: 60 },
+                    { time: '10:00 - 13:00', name: 'Hobbies e Crochê', type: 'lazer', icon: '🧶', location: 'Casa', duration: 180 },
+                    { time: '13:00 - 14:00', name: 'Atendimento - Tatiana', type: 'atendimento', icon: '💻', location: 'Home Office', duration: 60 },
+                    { time: '14:00 - 18:00', name: 'My Story - Desenvolvimento', type: 'lazer', icon: '💻', location: 'Casa', duration: 240 },
+                    { time: '18:00 - 22:00', name: 'Lazer com Companheiro', type: 'lazer', icon: '🎬', location: 'Casa', duration: 240 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            },
+            domingo: {
+                title: 'Domingo',
+                activities: [
+                    { time: '08:00 - 08:30', name: 'Passeio com cachorrinhas', type: 'passeio', icon: '🐕', location: 'Casa', duration: 30 },
+                    { time: '09:00 - 12:00', name: 'Descanso e Hobbies', type: 'descanso', icon: '🏠', location: 'Casa', duration: 180 },
+                    { time: '12:00 - 18:00', name: 'My Story - Desenvolvimento', type: 'lazer', icon: '💻', location: 'Casa', duration: 360 },
+                    { time: '18:00 - 21:30', name: 'Lazer com Companheiro', type: 'lazer', icon: '🎬', location: 'Casa', duration: 210 },
+                    { time: '21:30 - 22:00', name: 'Preparo da Semana', type: 'descanso', icon: '📝', location: 'Casa', duration: 30 },
+                    { time: '22:00', name: 'Dormir', type: 'descanso', icon: '😴', location: 'Casa', duration: 0 }
+                ]
+            }
+        };
+        
+        let currentDay = 'segunda';
+        
+        function showDay(day) {
+            currentDay = day;
+            
+            // Update active button
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update content
+            renderTimeline(day);
+            renderStats(day);
+        }
+        
+        function renderTimeline(day) {
+            const dayData = scheduleData[day];
+            const timeline = document.getElementById('timeline');
+            const dayTitle = document.getElementById('dayTitle');
+            
+            dayTitle.textContent = dayData.title;
+            timeline.innerHTML = '';
+            
+            let counter = 1;
+            
+            dayData.activities.forEach((activity, index) => {
+                if (activity.travel) {
+                    // Render travel time
+                    const travelDiv = document.createElement('div');
+                    travelDiv.className = 'timeline-travel';
+                    travelDiv.innerHTML = `
+                        <span class="travel-icon">🚗</span>
+                        <span>Deslocamento: ${activity.time} - ${activity.mode}</span>
+                    `;
+                    timeline.appendChild(travelDiv);
+                } else {
+                    // Render activity
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'timeline-item';
+                    itemDiv.innerHTML = `
+                        <div class="timeline-marker">${counter}</div>
+                        <div class="timeline-content">
+                            <div class="timeline-time">${activity.time}</div>
+                            <div class="timeline-activity">
+                                <div class="activity-icon type-${activity.type}">${activity.icon}</div>
+                                <div class="activity-info">
+                                    <div class="activity-name">${activity.name}</div>
+                                    <div class="activity-location">📍 ${activity.location}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    timeline.appendChild(itemDiv);
+                    counter++;
+                }
+            });
+        }
+        
+        function renderStats(day) {
+            const dayData = scheduleData[day];
+            const statsContent = document.getElementById('statsContent');
+            const totalTimeEl = document.getElementById('totalTime');
+            
+            // Calculate statistics
+            const stats = {
+                trabalho: 0,
+                exercicio: 0,
+                atendimentos: 0,
+                descanso: 0,
+                deslocamento: 0,
+                total: 0
+            };
+            
+            dayData.activities.forEach(activity => {
+                if (activity.travel) {
+                    const time = parseInt(activity.time) || 0;
+                    stats.deslocamento += time;
+                } else if (activity.duration) {
+                    stats.total += activity.duration;
+                    
+                    if (activity.type === 'trabalho') {
+                        stats.trabalho += activity.duration;
+                    } else if (['musculacao', 'muaythai', 'danca', 'funcional', 'passeio'].includes(activity.type)) {
+                        stats.exercicio += activity.duration;
+                    } else if (activity.type === 'atendimento') {
+                        stats.atendimentos += activity.duration;
+                    } else if (['descanso', 'lazer', 'cafe'].includes(activity.type)) {
+                        stats.descanso += activity.duration;
+                    }
+                }
+            });
+            
+            // Convert minutes to hours and minutes
+            const formatTime = (minutes) => {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                return hours > 0 ? `${hours}h${mins > 0 ? mins + 'min' : ''}` : `${mins}min`;
+            };
+            
+            // Render stats
+            statsContent.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">💼 Trabalho</span>
+                    <span class="stat-value">${formatTime(stats.trabalho)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">💪 Exercícios</span>
+                    <span class="stat-value">${formatTime(stats.exercicio)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">💻 Atendimentos</span>
+                    <span class="stat-value">${formatTime(stats.atendimentos)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🏠 Descanso/Lazer</span>
+                    <span class="stat-value">${formatTime(stats.descanso)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🚗 Deslocamentos</span>
+                    <span class="stat-value">${formatTime(stats.deslocamento)}</span>
+                </div>
+            `;
+            
+            totalTimeEl.textContent = formatTime(stats.total);
+        }
+        
+        // Initialize with Monday
+        renderTimeline('segunda');
+        renderStats('segunda');
+    </script>
+</body>
+</html>
